@@ -9,6 +9,7 @@ from statistics import mean
 import preprocessing as pre
 import healthy_leaf as healthy_classification
 import FK_holes as FK1
+import FK_mutation as FK2
 
 import scoring_model as model
 import scoring_model_disease as disease_model
@@ -78,11 +79,14 @@ if fs is not None:
         else:
             print("unhealthy leaf")
             hole, hole_img = FK1.holes(leaf)
+            mutation = FK2.mutation(cnt,mask)
             print(hole)
-            if len(hole)>0 and mean(hole) > 160:
+            if len(hole)>0 and mean(hole) > 160 :
                 st.text("Kanamediri Haniya")
                 st.image(hole_img)
 
+            if mutation >=3:
+                st.text("Kanamediri Haniya-mutation")
             else:
                 print(img_path)
                 disease_type, B, K, M = disease_model.classification(img_path)

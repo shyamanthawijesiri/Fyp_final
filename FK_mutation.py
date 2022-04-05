@@ -105,74 +105,49 @@ def drawGraph(r_t, l_t, r_b, l_b):
     axs[1, 1].set_title('left_bottom')
     axs[1, 1].plot(l_bottom, linestyle='dotted')
     plt.show()
+
 def detectMutation(r_t, l_t, r_b, l_b):
     r_top = np.array(r_t)
     l_top = np.array(l_t)
     r_bottom = np.array(r_b)
     l_bottom = np.array(l_b)
     mution = 0
-    for x in r_top:
-        print(x)
         # gap = np.diff([l_top[0]] + l_top)
     gaprt = np.diff(r_top)
-    print("Gap of right top =", gaprt)
-
     for y in range(gaprt.shape[0]):
         if abs(gaprt[y]) > 10:
-            print("Mutation")
+
+            mution += 1
             break
 
-    for x in l_top:
-        print(x)
-    gaplt = np.diff(l_top)
-    print("Gap of left top =", gaplt)
 
+    gaplt = np.diff(l_top)
     for y in range(gaplt.shape[0]):
         if abs(gaplt[y]) > 10:
-            print("Mutation")
+            mution += 1
             break
 
-    for x in r_bottom:
-        print(x)
     gaprb = np.diff(r_bottom)
-    print("Gap of right bottom =", gaprb)
 
     for y in range(gaprb.shape[0]):
         if abs(gaprb[y]) > 10:
-            print("Mutation")
+            mution += 1
             break
-
-    for x in l_bottom:
-        print(x)
     gaplb = np.diff(l_bottom)
-    print("Gap of left bottom=", gaplb)
 
     for y in range(gaplb.shape[0]):
         if abs(gaplb[y]) > abs(10):
-            print("Mutation")
+            mution +=1
             break
 
+    return mution
+
+def mutation(cnt,mask):
+    cx, cy, b_m, t_m = cntCenter(cnt)
+    can = cannyImage(mask)
+    r_t, l_t, r_b, l_b = measureDistance(can, cx, cy, b_m, t_m)
+    mut = detectMutation(r_t, l_t, r_b, l_b )
+    return mut
 
 
 
-
-
-
-img = getImage('BA4.jpg')
-#img = getImage('KMH2.jpg')
-#img = getImage('kananopatches.jpg')
-
-bImg = binaryImage(img)
-cImg, mask, leaf, cnt = getLeaf(bImg, img)
-
-cx, cy, b_m, t_m = cntCenter(cnt)
-can = cannyImage(mask)
-r_t, l_t, r_b, l_b = measureDistance(can, cx, cy, b_m, t_m)
-# drawGraph(r_t, l_t, r_b, l_b)
-# print(cx,cy)
-
-
-# cv2.imshow('mask',mask)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
