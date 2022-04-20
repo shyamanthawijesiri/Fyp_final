@@ -81,25 +81,25 @@ def heightDefference(gap):
         gap_kanda = (30-gap)/30
     return gap_kanda,gap_piduna
 
-def rMeanRan(rMean):
-    MAX = 80
-    RMEAN_RAN_MIN =0
-    RMEAN_RAN_MAX =40
+def bMeanRan(bMean):
+    MAX = 60
+    BMEAN_RAN_MIN =0
+    BMEAN_RAN_MAX = 29
     global p_ran
-    if rMean > RMEAN_RAN_MIN and rMean<= RMEAN_RAN_MAX:
+    if bMean > BMEAN_RAN_MIN and bMean<= BMEAN_RAN_MAX:
         p_ran = 1
-    elif rMean>RMEAN_RAN_MAX:
-        p_ran = (MAX - rMean)/(MAX-RMEAN_RAN_MAX)
+    elif bMean>BMEAN_RAN_MAX:
+        p_ran = (MAX - bMean)/(MAX-BMEAN_RAN_MAX)
     return p_ran
 
-def rMeanKanda(rMean):
-    RMEAN_KANDA_MIN =41
+def bMeanKanda(bMean):
+    BMEAN_KANDA_MIN =29
     # RMEAN_RAN_MAX =40
     global p_kanda
-    if rMean > RMEAN_KANDA_MIN:
+    if bMean > BMEAN_KANDA_MIN:
         p_kanda = 1
-    elif rMean<RMEAN_KANDA_MIN:
-        p_kanda = (rMean)/(RMEAN_KANDA_MIN)
+    elif bMean<BMEAN_KANDA_MIN:
+        p_kanda = (bMean)/(BMEAN_KANDA_MIN)
     return p_kanda
 
 def gMeanKalu(gMean):
@@ -124,6 +124,35 @@ def gMeanSudu(gMean):
         p_sudu = gMean/GMEAN_SUDU_MIN
     return p_sudu
 
+def getColor(rMean,gStd):
+    RMEAN_RAN_MAX = 25
+    RMEAN_KALU_SUDU_MAX = 44
+    RMEAN_KANDA_MAX = 80
+    GSTD_KALU_MAX = 125
+    GSTD_SUDU_MAX = 220
+    global p_sudu
+    global p_kalu
+    global p_kanda
+    global p_ran
+    if rMean<RMEAN_RAN_MAX:
+        p_ran = 1
+        p_kalu = p_sudu = rMean/RMEAN_RAN_MAX
+        p_kanda = rMean/RMEAN_KALU_SUDU_MAX
+    elif rMean<RMEAN_KALU_SUDU_MAX:
+        p_ran =(RMEAN_KALU_SUDU_MAX -rMean) /( RMEAN_KALU_SUDU_MAX-RMEAN_RAN_MAX)
+        p_kanda = (rMean-RMEAN_RAN_MAX)/( RMEAN_KALU_SUDU_MAX-RMEAN_RAN_MAX)
+        if gStd< GSTD_KALU_MAX:
+            p_kalu = 1
+            p_sudu = gStd/ GSTD_KALU_MAX
+        else:
+            p_sudu =1
+            p_kalu = (GSTD_SUDU_MAX-gStd)/(GSTD_SUDU_MAX - GSTD_KALU_MAX)
+    else:
+        p_kanda = 1
+        p_kalu = p_sudu = (RMEAN_KANDA_MAX-rMean)/(RMEAN_KANDA_MAX-RMEAN_KALU_SUDU_MAX)
+        p_ran =(RMEAN_KANDA_MAX-rMean)/(RMEAN_KANDA_MAX-RMEAN_RAN_MAX)
+    return p_kalu,p_sudu,p_kanda,p_ran
+
 def featureExtraction(path):
     img = gt.getImage(path)
     # cv2.imshow('img',img)
@@ -133,27 +162,61 @@ def featureExtraction(path):
         _, width, height = dimension.getDimession(img)
         mean, std = color.getMeanStdDev(leaf, mask)
         _, dif = gap.getGap(img, cnt, leaf, mask)
-        return width, height,mean[0],mean[1],dif
+        return width, height,mean[0],mean[1],2,dif
     except Exception as ex:
         err = type(ex).__name__
         print(err)
 
-def classification(width,length,rMean,gMean,dif):
-    result_label = ['kalu','sudu','kanda','ran','kori']
+def classification(width,length,rMean,gMean,gStd,dif):
+
     pkalu = widthKalu(width)*lengthKalu(length)
     pkori = widthKorikan(width)*lengthKorikan(length)
-    gap_kanda, gap_piduna = heightDefference(dif)
-    # if pkalu == 1 or pkori == 1:
-    #     print("kalu prob = {} \nkorikan prob = {}".format(pkalu, pkori))
-    #     return
-    # else:
-    pran = rMeanRan(rMean)*gap_kanda
-    pkanda = rMeanKanda(rMean)*gap_kanda
-    pkalu = pkalu * gMeanKalu(gMean)*gap_piduna
-    psudu = gMeanSudu(gMean)*gap_piduna
-    max_prob = [pkalu,psudu,pkanda,pran,pkori]
-    index = max_prob.index(max(max_prob))
-    return result_label[index],pkalu,psudu,pkanda,pran,pkori
+    scores = {}
+    if pkori == 1:
+        scores["category"] = "Korikan"
+        scores["korikan"] = pkori
+        return scores
+    else:
+        if dif >5 and dif < 10:
+            pran = getColor(rMean, gStd)[3]
+            pkanda = getColor(rMean, gStd)[2]
+            pkalu = pkalu * getColor(rMean, gStd)[0]
+            psudu = getColor(rMean, gStd)[1]
+            scores["kalu"] = pkalu
+            scores["Sudu"] = psudu
+            scores["Kanda Kola"] = pkanda
+            scores["Ran Kola"] = pran
+            scores["korikan"] = pkori
+            return scores
+
+        elif dif < 5:
+            pran = bMeanRan(rMean)
+            pkanda = bMeanKanda(rMean)
+            scores["kalu"] = pkalu
+            scores["Kanda Kola"] = pkanda
+            scores["Ran Kola"] = pran
+            scores["korikan"] = pkori
+            return scores
+        else:
+            pkalu = pkalu * gMeanKalu(gMean)
+            psudu = gMeanSudu(gMean)
+            scores["kalu"] = pkalu
+            scores["Sudu"] = psudu
+            scores["korikan"] = pkori
+            return scores
+
+    # gap_kanda, gap_piduna = heightDefference(dif)
+    # # if pkalu == 1 or pkori == 1:
+    # #     print("kalu prob = {} \nkorikan prob = {}".format(pkalu, pkori))
+    # #     return
+    # # else:
+    # pran = rMeanRan(rMean)*gap_kanda
+    # pkanda = rMeanKanda(rMean)*gap_kanda
+    # pkalu = pkalu * gMeanKalu(gMean)*gap_piduna
+    # psudu = gMeanSudu(gMean)*gap_piduna
+    # max_prob = [pkalu,psudu,pkanda,pran,pkori]
+    # index = max_prob.index(max(max_prob))
+    # return result_label[index],pkalu,psudu,pkanda,pran,pkori
     # if index == 0:
     #     return 'kalu'
     # elif index == 1:
