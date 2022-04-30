@@ -96,6 +96,8 @@ if fs is not None:
                     st.text("{} - {}".format(c,s))
 
         else:
+            with st.spinner('Wait for it...'):
+                time.sleep(2)
             new_title = '<p style="color:red; font-size: 32px; font-weight:bold; text-align: center;">Unhealthy Leaf</p>'
             st.markdown(new_title, unsafe_allow_html=True)
             print("unhealthy leaf")
@@ -110,17 +112,28 @@ if fs is not None:
                     with st.spinner('Wait for it...'):
                         time.sleep(4)
                     st.subheader("Predicted Disease")
-                    KH = f'<p style="color:red; font-size: 32px; font-weight:bold;">Kanamediri Haniya</p>'
+                    KH = f'<p style="color:red; font-size: 22px; font-weight:bold;">Kanamediri Haniya</p>'
                     st.markdown(KH, unsafe_allow_html=True)
                     # st.subheader("Predicted category - {}".format(category))
                 with col3:
                     st.subheader("Disease Percentage")
-                    per = f'<p style="color:purple; font-size: 32px; font-weight:bold;">{K_percentage}</p>'
+                    per = f'<p style="color:purple; font-size: 22px; font-weight:bold;">{round(K_percentage,2)} %</p>'
                     st.markdown(per, unsafe_allow_html=True)
 
+
             elif mutation >=3:
-                st.subheader("Predicted Disease")
-                st.subheader("Predicted disease - Kanamediri Haniya")
+                col1, col2, col3 = st.columns([1, 4, 3])
+
+                with col1:
+                    st.write("")
+                with col2:
+                    with st.spinner('Wait for it...'):
+                        time.sleep(4)
+                    st.subheader("Predicted Disease")
+                    KH = f'<p style="color:red; font-size: 22px; font-weight:bold;">Kanamediri Haniya</p>'
+                    st.markdown(KH, unsafe_allow_html=True)
+                    # st.subheader("Predicted category - {}".format(category)
+
             else:
                 col1, col2, col3 = st.columns([1, 4, 3])
                 with col1:
@@ -131,15 +144,15 @@ if fs is not None:
                     disease_type, B, K, M = disease_model.classification(img_path)
                     percentage = dp.percentage(img_path)
                     st.subheader("Predicted Disease")
-                    disease = f'<p style="color:red; font-size: 32px; font-weight:bold;">{disease_type}</p>'
+                    disease = f'<p style="color:red; font-size: 22px; font-weight:bold;">{disease_type}</p>'
                     st.markdown(disease, unsafe_allow_html=True)
                     st.subheader("Disease Percentage")
-                    per = f'<p style="color:purple; font-size: 32px; font-weight:bold;">{percentage}</p>'
+                    per = f'<p style="color:purple; font-size: 22px; font-weight:bold;">{round(percentage,2)} %</p>'
                     st.markdown(per, unsafe_allow_html=True)
                     # st.subheader("Predicted category - {}".format(category))
                 with col3:
                     st.subheader("Probabilities")
-                    st.text("Bacterial - {}".format(B))
-                    st.text("Kanamediri Haniya - {}".format(K))
-                    st.text("Betel Rust - {}".format(M))
+                    st.text("Bacterial - {}".format(round(B,4)))
+                    st.text("Kanamediri Haniya - {}".format(round(K,4)))
+                    st.text("Betel Rust - {}".format(round(M,4)))
 
