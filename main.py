@@ -1,5 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import time
 
 from PIL import Image
 import cv2
@@ -23,8 +24,6 @@ def cvtRGB(img):
 def resized(img):
     size = 512
     return cv2.resize(img,(size, size))
-
-
 
 st.title('Betel vine Categorization and Disease Detection')
 fs = st.file_uploader('upload Image',['jpg','png','jpeg'])
@@ -70,37 +69,77 @@ if fs is not None:
 
         result = healthy_classification.healthyLeafClassification(leaf)
         if result == 0:
+            with st.spinner('Wait for it...'):
+                time.sleep(2)
             new_title = '<p style="color:Green; font-size: 32px;font-weight:bold; text-align: center;">Healthy Leaf</p>'
             st.markdown(new_title, unsafe_allow_html=True)
             print("healthy leaf")
             width, length, rMean, gMean, gStd, dif = model.featureExtraction(input_img)
             scores = model.classification(width, length, rMean, gMean,gStd, dif)
             category = max(scores.items(), key=operator.itemgetter(1))[0]
-            st.subheader("image name - {}".format(fs.name))
-            st.subheader("Predicted category - {}".format(category))
-            st.header("Probabilities")
-            for c,s in scores.items():
-                st.text("{} - {}".format(c,s))
+            # st.subheader("image name - {}".format(fs.name))
+
+            col1, col2, col3= st.columns([1, 4, 3])
+
+            with col1:
+                st.write("")
+            with col2:
+                with st.spinner('Wait for it...'):
+                    time.sleep(4)
+                st.subheader("Predicted category")
+                new_title = f'<p style="color:red; font-size: 32px; font-weight:bold;">{category}</p>'
+                st.markdown(new_title, unsafe_allow_html=True)
+                # st.subheader("Predicted category - {}".format(category))
+            with col3:
+                st.subheader("Probabilities")
+                for c,s in scores.items():
+                    st.text("{} - {}".format(c,s))
 
         else:
-            new_title = '<p style="color:red; font-size: 32px; font-weight:bold; text-align: center;">Unealthy Leaf</p>'
+            new_title = '<p style="color:red; font-size: 32px; font-weight:bold; text-align: center;">Unhealthy Leaf</p>'
             st.markdown(new_title, unsafe_allow_html=True)
             print("unhealthy leaf")
             hole, hole_img,K_percentage = FK1.holes(leaf)
             mutation = FK2.mutation(cnt,mask)
-            print("Disease percentage {} %".format(round(K_percentage,2)))
             if len(hole)>0 and mean(hole) > 160 :
-                st.subheader("Predicted disease - Kanamediri Haniya")
+                col1, col2, col3 = st.columns([1, 4, 3])
+
+                with col1:
+                    st.write("")
+                with col2:
+                    with st.spinner('Wait for it...'):
+                        time.sleep(4)
+                    st.subheader("Predicted Disease")
+                    KH = f'<p style="color:red; font-size: 32px; font-weight:bold;">Kanamediri Haniya</p>'
+                    st.markdown(KH, unsafe_allow_html=True)
+                    # st.subheader("Predicted category - {}".format(category))
+                with col3:
+                    st.subheader("Disease Percentage")
+                    per = f'<p style="color:purple; font-size: 32px; font-weight:bold;">{K_percentage}</p>'
+                    st.markdown(per, unsafe_allow_html=True)
+
             elif mutation >=3:
+                st.subheader("Predicted Disease")
                 st.subheader("Predicted disease - Kanamediri Haniya")
             else:
-                percentage = dp.percentage(img_path)
-                disease_type, B, K, M = disease_model.classification(img_path)
-                st.subheader("image name - {}".format(fs.name))
-                st.subheader("Disease percentage - {} %".format(round(percentage,2)))
-                st.subheader("Predicted disease - {}".format(disease_type))
-                st.header("Probabilities")
-                st.text("Bacterial - {}".format(B))
-                st.text("Kanamediri Haniya - {}".format(K))
-                st.text("Betel Rust - {}".format(M))
+                col1, col2, col3 = st.columns([1, 4, 3])
+                with col1:
+                    st.write("")
+                with col2:
+                    with st.spinner('Wait for it...'):
+                        time.sleep(4)
+                    disease_type, B, K, M = disease_model.classification(img_path)
+                    percentage = dp.percentage(img_path)
+                    st.subheader("Predicted Disease")
+                    disease = f'<p style="color:red; font-size: 32px; font-weight:bold;">{disease_type}</p>'
+                    st.markdown(disease, unsafe_allow_html=True)
+                    st.subheader("Disease Percentage")
+                    per = f'<p style="color:purple; font-size: 32px; font-weight:bold;">{percentage}</p>'
+                    st.markdown(per, unsafe_allow_html=True)
+                    # st.subheader("Predicted category - {}".format(category))
+                with col3:
+                    st.subheader("Probabilities")
+                    st.text("Bacterial - {}".format(B))
+                    st.text("Kanamediri Haniya - {}".format(K))
+                    st.text("Betel Rust - {}".format(M))
 
