@@ -14,9 +14,12 @@ def holes(orgLeaf):
     # Draw the contour
     img_hole = orgLeaf.copy()
     hole_color = []
+    total_area = 0
     for i in range(len(contours) - 1):
         area = cv2.contourArea(contours[i])
+
         if area > 10:
+            total_area =+ area
             cv2.drawContours(img_hole, [contours[i]], contourIdx=-1, color=(255, 0, 0), thickness=1)
             c_0 = contours[i]
             M = cv2.moments(c_0)
@@ -25,4 +28,5 @@ def holes(orgLeaf):
             a = leaf[cy, cx]
             hole_color.append(a)
 
-    return hole_color,img_hole
+    affected_prec = (total_area/cv2.contourArea(contours[len(contours)-1]))*100
+    return hole_color,img_hole,affected_prec

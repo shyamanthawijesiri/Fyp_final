@@ -14,6 +14,7 @@ import FK_mutation as FK2
 
 import scoring_model as model
 import scoring_model_disease as disease_model
+import disease_percentage as dp
 
 
 
@@ -85,16 +86,18 @@ if fs is not None:
             new_title = '<p style="color:red; font-size: 32px; font-weight:bold; text-align: center;">Unealthy Leaf</p>'
             st.markdown(new_title, unsafe_allow_html=True)
             print("unhealthy leaf")
-            hole, hole_img = FK1.holes(leaf)
+            hole, hole_img,K_percentage = FK1.holes(leaf)
             mutation = FK2.mutation(cnt,mask)
-            print(hole)
+            print("Disease percentage {} %".format(round(K_percentage,2)))
             if len(hole)>0 and mean(hole) > 160 :
                 st.subheader("Predicted disease - Kanamediri Haniya")
             elif mutation >=3:
                 st.subheader("Predicted disease - Kanamediri Haniya")
             else:
+                percentage = dp.percentage(img_path)
                 disease_type, B, K, M = disease_model.classification(img_path)
                 st.subheader("image name - {}".format(fs.name))
+                st.subheader("Disease percentage - {} %".format(round(percentage,2)))
                 st.subheader("Predicted disease - {}".format(disease_type))
                 st.header("Probabilities")
                 st.text("Bacterial - {}".format(B))
