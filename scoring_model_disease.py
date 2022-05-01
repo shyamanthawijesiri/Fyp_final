@@ -125,7 +125,7 @@ def density(img):
 
 def classification(img_path):
     img = gt.getImage(img_path)
-    result_label = ['Bacterial Leaf ', 'Kanamedira Haniya', 'Betel Rust']
+    result_label = ['Bacterial Leaf Blight', 'Kalamadiri Haniya (early stage)', 'Betel Rust']
     BcolorVariation, KcolorVariation, McolorVariation = colorVariation(img)
     BdiseaseColor, KdiseaseColor, MdiseaseColor = diseaseColor(img)
     BdiseaseArea, KdiseaseArea, MdiseaseArea = diseaseArea(img)

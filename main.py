@@ -85,7 +85,7 @@ if fs is not None:
                 st.write("")
             with col2:
                 with st.spinner('Wait for it...'):
-                    time.sleep(4)
+                    time.sleep(3)
                 st.subheader("Predicted category")
                 new_title = f'<p style="color:red; font-size: 32px; font-weight:bold;">{category}</p>'
                 st.markdown(new_title, unsafe_allow_html=True)
@@ -110,7 +110,7 @@ if fs is not None:
                     st.write("")
                 with col2:
                     with st.spinner('Wait for it...'):
-                        time.sleep(4)
+                        time.sleep(3)
                     st.subheader("Predicted Disease")
                     KH = f'<p style="color:red; font-size: 22px; font-weight:bold;">Kanamediri Haniya</p>'
                     st.markdown(KH, unsafe_allow_html=True)
@@ -128,31 +128,42 @@ if fs is not None:
                     st.write("")
                 with col2:
                     with st.spinner('Wait for it...'):
-                        time.sleep(4)
+                        time.sleep(3)
                     st.subheader("Predicted Disease")
                     KH = f'<p style="color:red; font-size: 22px; font-weight:bold;">Kanamediri Haniya</p>'
                     st.markdown(KH, unsafe_allow_html=True)
                     # st.subheader("Predicted category - {}".format(category)
 
             else:
-                col1, col2, col3 = st.columns([1, 4, 3])
+                # with st.spinner('Wait for it...'):
+                #     time.sleep(3)
+                col1, col2,col3 = st.columns([1, 3, 4])
+                disease_type, B, K, M = disease_model.classification(img_path)
+                percentage = dp.percentage(img_path)
                 with col1:
                     st.write("")
                 with col2:
-                    with st.spinner('Wait for it...'):
-                        time.sleep(4)
-                    disease_type, B, K, M = disease_model.classification(img_path)
-                    percentage = dp.percentage(img_path)
-                    st.subheader("Predicted Disease")
-                    disease = f'<p style="color:red; font-size: 22px; font-weight:bold;">{disease_type}</p>'
-                    st.markdown(disease, unsafe_allow_html=True)
-                    st.subheader("Disease Percentage")
-                    per = f'<p style="color:purple; font-size: 22px; font-weight:bold;">{round(percentage,2)} %</p>'
-                    st.markdown(per, unsafe_allow_html=True)
+                    heading = f'<h4 style="font-weight:bold;">Predicted Disease</h4>'
+                    st.markdown(heading, unsafe_allow_html=True)
+
+                    # st.subheader("Predicted Disease ")
+
+                    heading = f'<h4 style="font-weight:bold;">Disease Percentage</h4>'
+                    st.markdown(heading, unsafe_allow_html=True)
+
+                    # st.subheader("Disease Percentage ")
+
+                    heading = f'<h4 style="font-weight:bold;">Scores</h4>'
+                    st.markdown(heading, unsafe_allow_html=True)
+                    # st.subheader("Probabilities")
+                    st.text("1.Bacterial Leaf Blight - {}".format(round(B, 4)))
+                    st.text("2.Kalamadiri Haniya - {}".format(round(K, 4)))
+                    st.text("3.Betel Rust - {}".format(round(M, 4)))
                     # st.subheader("Predicted category - {}".format(category))
                 with col3:
-                    st.subheader("Probabilities")
-                    st.text("Bacterial - {}".format(round(B,4)))
-                    st.text("Kanamediri Haniya - {}".format(round(K,4)))
-                    st.text("Betel Rust - {}".format(round(M,4)))
+                    disease = f'<p style="color:#4169e1; font-size: 20px; font-weight:bold; margin-top:14px;">{disease_type}</p>'
+                    st.markdown(disease, unsafe_allow_html=True)
+                    per = f'<p style="color:#4169e1; font-size: 20px; font-weight:bold; margin-top:18px;">{round(percentage, 2)} %</p>'
+                    st.markdown(per, unsafe_allow_html=True)
+
 
