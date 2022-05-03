@@ -10,12 +10,6 @@ import color_detect as color
 import height_difference as gap
 
 
-def width():
-    W_KORI_MIN = 0
-    W_KORI_MAX = 12
-
-    W_KALU_MIN = 17
-
 def widthKorikan(width):
     W_MAX = 20
     W_KORI_MIN = 0
@@ -44,6 +38,31 @@ def lengthKorikan(length):
 
     return p_kori
 
+def lengthRan(length):
+    L_RAN_MIN = 0
+    L_RAN_MAX = 20.5
+    L_MAX = 30
+    # W_KALU_MAX = 20
+    global p_ran
+    if length > L_RAN_MIN and length<= L_RAN_MAX:
+        p_ran = 1
+    elif length > L_RAN_MAX:
+        p_ran = (L_MAX - length)/(L_MAX-L_RAN_MAX)
+    return p_ran
+def lengthSudu(length):
+    L_SUDU_MIN = 20
+    L_SUDU_MAX = 26
+    L_MAX = 30
+    # W_KALU_MAX = 20
+    global p_sudu
+
+    if length > L_SUDU_MIN and length<= L_SUDU_MAX:
+        p_sudu = 1
+    elif length < L_SUDU_MIN:
+        p_sudu = length / (L_SUDU_MIN)
+    else:
+        p_sudu = (L_MAX - length)/(L_MAX-L_SUDU_MAX)
+    return p_sudu
 
 def widthKalu(width):
     W_KALU_MIN = 17
@@ -68,6 +87,7 @@ def lengthKalu(length):
         p_kalu = length / (L_KALU_MIN)
 
     return p_kalu
+
 
 def heightDefference(gap):
     MIN_GAP = 8
@@ -173,16 +193,16 @@ def classification(width,length,rMean,gMean,gStd,dif):
     pkori = widthKorikan(width)*lengthKorikan(length)
     scores = {}
     if pkori == 1:
-        scores["category"] = "Korikan"
+        # scores["category"] = "Korikan"
         scores["korikan"] = pkori
+        scores["kalu"] = pkalu
         return scores
     else:
-        if dif >5 and dif < 10:
+        if dif >5 and dif < 12:
             pran = getColor(rMean, gStd)[3]
             pkanda = getColor(rMean, gStd)[2]
             pkalu = pkalu * getColor(rMean, gStd)[0]
             psudu = getColor(rMean, gStd)[1]
-            scores["kalu"] = pkalu
             scores["Sudu"] = psudu
             scores["Kanda Kola"] = pkanda
             scores["Ran Kola"] = pran
@@ -190,18 +210,24 @@ def classification(width,length,rMean,gMean,gStd,dif):
             return scores
 
         elif dif < 5:
-            pran = bMeanRan(rMean)
-            pkanda = bMeanKanda(rMean)
+            pran = bMeanRan(rMean) * getColor(rMean, gStd)[3]
+            pkanda = bMeanKanda(rMean) * getColor(rMean, gStd)[2]
+            psudu = gMeanSudu(gMean) * getColor(rMean, gStd)[1]
             scores["kalu"] = pkalu
+            scores["Sudu"] = psudu
             scores["Kanda Kola"] = pkanda
             scores["Ran Kola"] = pran
             scores["korikan"] = pkori
             return scores
         else:
-            pkalu = pkalu * gMeanKalu(gMean)
-            psudu = gMeanSudu(gMean)
+            pran = getColor(rMean, gStd)[3]
+            pkanda = getColor(rMean, gStd)[2]
+            pkalu = pkalu * gMeanKalu(gMean) * pkalu * getColor(rMean, gStd)[0]
+            psudu = gMeanSudu(gMean) * getColor(rMean, gStd)[1]
             scores["kalu"] = pkalu
             scores["Sudu"] = psudu
+            scores["Kanda Kola"] = pkanda
+            scores["Ran Kola"] = pran
             scores["korikan"] = pkori
             return scores
 
@@ -244,36 +270,36 @@ def classification(width,length,rMean,gMean,gStd,dif):
 
 # classification(width,length,rMean,gMean,dif)
 # print(dif)
-def predict():
-    categories = ['korikan','kalu','sudu']
-    datadir = 'C:/Users/shyamantha/Documents/final year project/images/catergory/dataset/validation'
-    f = open('result.csv', 'w', newline='')
-    fieldnames = ['Img_name', 'Category','Predict_result',]
-    writer = csv.DictWriter(f, fieldnames=fieldnames)
-    writer.writeheader()
-
-    for i in categories:
-        print(f'loading... category : {i}')
-        path = os.path.join(datadir, i)
-        print(path)
-        for img_name in os.listdir(path):
-            try:
-                width, length, rMean, gMean, dif = featureExtraction(os.path.join(path, img_name))
-                print("Width => {}".format(width))
-                print("Length => {}".format(length))
-                print("Rmean => {}".format(rMean))
-                print("Gmean => {}".format(gMean))
-                print("Gap => {}".format(dif))
-                catergory = classification(width, length, rMean, gMean, dif)
-                writer.writerow({
-                    fieldnames[0]: img_name, fieldnames[1]: i, fieldnames[2]: catergory
-                })
-
-            except Exception as ex:
-                err = type(ex).__name__
-                # writer.writerow({fieldnames[0]: img_name, fieldnames[1]: i, fieldnames[2]: err, fieldnames[3]: err})
-                print(err)
-                print(ex)
+# def predict():
+#     categories = ['korikan','kalu','sudu']
+#     datadir = 'C:/Users/shyamantha/Documents/final year project/images/catergory/dataset/validation'
+#     f = open('result.csv', 'w', newline='')
+#     fieldnames = ['Img_name', 'Category','Predict_result',]
+#     writer = csv.DictWriter(f, fieldnames=fieldnames)
+#     writer.writeheader()
+#
+#     for i in categories:
+#         print(f'loading... category : {i}')
+#         path = os.path.join(datadir, i)
+#         print(path)
+#         for img_name in os.listdir(path):
+#             try:
+#                 width, length, rMean, gMean, dif = featureExtraction(os.path.join(path, img_name))
+#                 print("Width => {}".format(width))
+#                 print("Length => {}".format(length))
+#                 print("Rmean => {}".format(rMean))
+#                 print("Gmean => {}".format(gMean))
+#                 print("Gap => {}".format(dif))
+#                 catergory = classification(width, length, rMean, gMean, dif)
+#                 writer.writerow({
+#                     fieldnames[0]: img_name, fieldnames[1]: i, fieldnames[2]: catergory
+#                 })
+#
+#             except Exception as ex:
+#                 err = type(ex).__name__
+#                 # writer.writerow({fieldnames[0]: img_name, fieldnames[1]: i, fieldnames[2]: err, fieldnames[3]: err})
+#                 print(err)
+#                 print(ex)
 
 
 # cv2.waitKey(0)
