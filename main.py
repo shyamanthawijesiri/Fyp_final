@@ -24,13 +24,14 @@ def cvtRGB(img):
 def resized(img):
     size = 512
     return cv2.resize(img,(size, size))
-
-st.title('Betel vine Categorization and Disease Detection')
+heading = f'<h1 style="font-weight:bold;text-align:center;">Betel vine Leaves Categorization and Disease Detection</h1>'
+st.markdown(heading, unsafe_allow_html=True)
+# st.title('Betel vine Leaves Categorization and Disease Detection')
 fs = st.file_uploader('upload Image',['jpg','png','jpeg'])
 save_path = 'images/upload/'
 
 isDir = os.path.isdir(save_path)
-
+t=2
 if not isDir :
     os.makedirs(save_path,0o666)
 
@@ -79,21 +80,24 @@ if fs is not None:
             category = max(scores.items(), key=operator.itemgetter(1))[0]
             # st.subheader("image name - {}".format(fs.name))
 
-            col1, col2, col3= st.columns([1, 4, 3])
+            col1, col2, col3= st.columns([1, 3, 4])
 
             with col1:
                 st.write("")
             with col2:
                 with st.spinner('Wait for it...'):
-                    time.sleep(3)
-                st.subheader("Predicted category")
-                new_title = f'<p style="color:red; font-size: 32px; font-weight:bold;">{category}</p>'
-                st.markdown(new_title, unsafe_allow_html=True)
-                # st.subheader("Predicted category - {}".format(category))
+                    time.sleep(t)
+                heading = f'<h4 style="font-weight:bold;">Predicted Category</h4>'
+                st.markdown(heading, unsafe_allow_html=True)
+
+                heading = f'<h4 style="font-weight:bold;">Scores</h4>'
+                st.markdown(heading, unsafe_allow_html=True)
+                for index,(c,s) in enumerate(scores.items()):
+                    st.text("{}.{} - {}".format(index+1,c,round(s,4)))
             with col3:
-                st.subheader("Probabilities")
-                for c,s in scores.items():
-                    st.text("{} - {}".format(c,s))
+                cat = f'<p style="color:#4169e1; font-size: 30px; font-weight:bold; margin-top:5px;">{category}</p>'
+                st.markdown(cat, unsafe_allow_html=True)
+
 
         else:
             with st.spinner('Wait for it...'):
@@ -104,39 +108,51 @@ if fs is not None:
             hole, hole_img,K_percentage = FK1.holes(leaf)
             mutation = FK2.mutation(cnt,mask)
             if len(hole)>0 and mean(hole) > 160 :
-                col1, col2, col3 = st.columns([1, 4, 3])
-
+                with st.spinner('Wait for it...'):
+                    time.sleep(t)
+                col1, col2, col3 = st.columns([1, 3, 4])
                 with col1:
                     st.write("")
                 with col2:
-                    with st.spinner('Wait for it...'):
-                        time.sleep(3)
-                    st.subheader("Predicted Disease")
-                    KH = f'<p style="color:red; font-size: 22px; font-weight:bold;">Kanamediri Haniya</p>'
-                    st.markdown(KH, unsafe_allow_html=True)
+                    heading = f'<h4 style="font-weight:bold;">Predicted Disease</h4>'
+                    st.markdown(heading, unsafe_allow_html=True)
+                    heading = f'<h4 style="font-weight:bold;">Disease Percentage</h4>'
+                    st.markdown(heading, unsafe_allow_html=True)
+
+                    # st.subheader("Predicted Disease")
+                    # KH = f'<p style="color:red; font-size: 22px; font-weight:bold;">Kanamediri Haniya</p>'
+                    # st.markdown(KH, unsafe_allow_html=True)
                     # st.subheader("Predicted category - {}".format(category))
                 with col3:
-                    st.subheader("Disease Percentage")
-                    per = f'<p style="color:purple; font-size: 22px; font-weight:bold;">{round(K_percentage,2)} %</p>'
+                    disease = f'<p style="color:#4169e1; font-size: 20px; font-weight:bold; margin-top:14px;">Kalamediri Haniya</p>'
+                    st.markdown(disease, unsafe_allow_html=True)
+                    per = f'<p style="color:#4169e1; font-size: 20px; font-weight:bold; margin-top:18px;">{round(K_percentage, 2)} %</p>'
                     st.markdown(per, unsafe_allow_html=True)
-
+                    #
+                    # st.subheader("Disease Percentage")
+                    # per = f'<p style="color:purple; font-size: 22px; font-weight:bold;">{round(K_percentage,2)} %</p>'
+                    # st.markdown(per, unsafe_allow_html=True)
 
             elif mutation >=3:
-                col1, col2, col3 = st.columns([1, 4, 3])
+                with st.spinner('Wait for it...'):
+                    time.sleep(t)
+                col1, col2, col3 = st.columns([1, 3, 4])
 
                 with col1:
                     st.write("")
                 with col2:
-                    with st.spinner('Wait for it...'):
-                        time.sleep(3)
-                    st.subheader("Predicted Disease")
-                    KH = f'<p style="color:red; font-size: 22px; font-weight:bold;">Kanamediri Haniya</p>'
-                    st.markdown(KH, unsafe_allow_html=True)
+                    heading = f'<h4 style="font-weight:bold;">Predicted Disease</h4>'
+                    st.markdown(heading, unsafe_allow_html=True)
+                    # st.subheader("Predicted Disease")
+                    # KH = f'<p style="color:red; font-size: 22px; font-weight:bold;">Kanamediri Haniya</p>'
+                    # st.markdown(KH, unsafe_allow_html=True)
                     # st.subheader("Predicted category - {}".format(category)
-
+                with col3:
+                    disease = f'<p style="color:#4169e1; font-size: 20px; font-weight:bold; margin-top:14px;">Kalamediri Haniya</p>'
+                    st.markdown(disease, unsafe_allow_html=True)
             else:
-                # with st.spinner('Wait for it...'):
-                #     time.sleep(3)
+                with st.spinner('Wait for it...'):
+                    time.sleep(t)
                 col1, col2,col3 = st.columns([1, 3, 4])
                 disease_type, B, K, M = disease_model.classification(img_path)
                 percentage = dp.percentage(img_path)

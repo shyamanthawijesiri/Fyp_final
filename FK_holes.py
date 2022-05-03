@@ -29,4 +29,4 @@ def holes(orgLeaf):
             hole_color.append(a)
 
     affected_prec = (total_area/cv2.contourArea(contours[len(contours)-1]))*100
-    return hole_color,img_hole,affected_prec
+    return hole_color,img_hole,affected_prec*10

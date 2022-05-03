@@ -31,12 +31,10 @@ def percentage(frame):
     for index, i in enumerate(contoursz_):
         contourArea.append(cv2.contourArea(i))
 
-    print("List of area values except largest area:", contourArea)
-    print("Area h:", area_h )
 
     areaSum = sum(contourArea)
 
-    print("Area l:", areaSum)
+
     DiseasePercentage= areaSum*100/area_h
 
     print("Disease Percentage:", DiseasePercentage)
